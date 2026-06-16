@@ -1,4 +1,4 @@
-@baseUrl = http://localhost:5001
+@baseUrl = https://8919lab2wa-fdcxg6h9c9fuh2a7.westus3-01.azurewebsites.net
 
 ### Health check
 GET {{baseUrl}}/

@@ -1,80 +1,80 @@
 # CST8919 Lab 2: Building a Web App with Threat Detection using Azure Monitor and KQL
 
+## YouTube Video Demo
 
-## Objective
+[https://youtu.be/0Dvo2835EIs]
 
-In this lab, you will:
-- Create a simple Demo Python Flask app
-- Deploy a the app to Azure App Service
-- Enable diagnostic logging with Azure Monitor
-- Use Kusto Query Language (KQL) to analyze logs
-- Create an alert rule to detect suspicious activity and send it to your email
----
-## Scenario
-As a cloud security engineer, you're tasked with securing a simple web application. The app logs login attempts. You must detect brute-force login behavior and configure an automatic alert when it occurs.
+The video demonstrates:
 
-## Tasks
-
-### Part 1: Deploy the Flask App to Azure
-1. Develop a Python Flask app with a `/login` route that logs both successful and failed login attempts.
-2. Deploy the app using **Azure Web App**.
-
-### Part 2: Enable Monitoring
-1. Create a **Log Analytics Workspace** in the same region.
-2. In your Web App, go to **Monitoring > Diagnostic settings**:
-   - Enable:
-     - `AppServiceConsoleLogs`
-     - `AppServiceHTTPLogs` (optional)
-   - Send to the Log Analytics workspace.
-3. Interact with the app to generate logs (e.g., failed `/login` attempts).
-
-
-You must test your app using a .http file (compatible with VS Code + REST Client) and include that file in your GitHub repo as test-app.http.
-
-### Part 3: Query Logs with KQL
-1. Create a KQL query to find failed login attempts.
-2. Test it
-
-### Part 4: Create an Alert Rule
-1. Go to Azure Monitor > Alerts > + Create > Alert Rule.
-2. Scope: Select your Log Analytics Workspace.
-3. Condition: Use the query you created in the last step.
-4. Set:
-    - Measure: Table rows
-    - Threshold: Greater than 5
-    - Aggregation granularity: 5 minutes
-    - Frequency of evaluation: 1 minute
-    - Add an Action Group to send an email notification.
-    - Name the rule and set Severity (2 or 3).
-    - Save the alert.
-
-## Submission
-### GitHub Repository
-- Initialize a Git repository for your project.
-- Make **frequent commits** with meaningful commit messages.
-- Push your code to a **public GitHub repository**.
-- Include  **YouTube demo link in the README.md**.
-
-Include a `README.md` with:
-  - Briefly describe what you learned during this lab, challenges you faced, and how you’d improve the detection logic in a real-world scenario.
-  - Your KQL query with explanation
-
-- **A link to a 5-minute YouTube video demo** showing:
-  - App deployed
-  - Log generation and inspection in Azure Monitor
-  - KQL query usage
-  - Alert configuration and triggering
-
-You must test your app using a .http file (compatible with VS Code + REST Client) and include that file in your GitHub repo as test-app.http.
-
+- The Flask application deployed to Azure App Service
+- Generating login activity using the REST Client
+- Viewing application logs in Azure Monitor and Log Analytics
+- Running the KQL query to identify failed login attempts
+- Creating and testing an Azure Monitor alert rule
+- Receiving the email notification after the alert is triggered
 
 ---
 
-## Submission Instructions
+# Application Testing
 
-Submit your **GitHub repository link** via Brightspace.
+I used a REST Client `test-app.http` file to generate both successful and failed login attempts.
 
-**Deadline**: Wednesday, 18 June 2025
+---
+
+# KQL Query
+
+```kusto
+AppServiceConsoleLogs
+| where ResultDescription has "LOGIN_FAILED"
+| project TimeGenerated, ResultDescription
+| order by TimeGenerated desc
+```
+
+## Query Explanation
+
+- Searches the `AppServiceConsoleLogs` table.
+- Filters log entries containing the text `LOGIN_FAILED`.
+- Displays the timestamp and log message.
+- Sorts the results from newest to oldest.
+
+---
+
+# What I Learned
+
+This lab helped me better understand how application monitoring works in Azure.
+
+I learned how to deploy a Flask application to Azure App Service and connect it to Azure Monitor for logging and analysis. I also learned how KQL can be used to search and filter logs stored in a Log Analytics Workspace.
+
+Another useful part of the lab was creating alert rules. Instead of manually checking logs, Azure Monitor can automatically detect suspicious activity and send notifications when a threshold is reached.
+
+---
+
+# Challenges Faced
+
+## HTTPS Redirection
+
+One issue I encountered was receiving HTTP 301 redirect responses when testing the application.
+
+Initially, the requests in my `.http` file were using the HTTP endpoint. Azure App Service automatically redirects traffic to HTTPS, so I updated the base URL to use HTTPS and the issue was resolved.
+
+## Log Ingestion Delay
+
+Another challenge was the delay between generating logs and seeing them appear in Log Analytics.
+
+After generating failed login attempts, it usually took a few minutes before the logs became available. Because of this delay, testing the KQL query and alert rule required some patience.
+
+## KQL Query Testing
+
+At first, I used the `contains` operator when searching log messages. Later, I learned that the `has` operator is generally more efficient because Azure can use indexing to search the logs faster.
+
+---
+
+# Real-World Improvements
+
+1. Track failed login attempts by IP address instead of counting all failed logins together.
+2. Implement account lockout or rate limiting after a certain number of failed attempts.
+3. Integrate Azure Logic Apps or Azure Functions to automatically respond to suspicious activity.
+4. Use Azure Web Application Firewall (WAF) to block malicious IP addresses automatically.
 
 ---
 
